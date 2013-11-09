@@ -1,0 +1,8 @@
+max_rd_len=150
+[LIB]
+avg_ins=195.0
+reverse_seq=0
+asm_flags=3
+rank=1
+q1=/home/kuleshov/asm/mock/soapdenovo/Assemble/in/SRR172903.fastq
+q2=/home/kuleshov/asm/mock/soapdenovo/Assemble/in/SRR172903.fastq.f2

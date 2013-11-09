@@ -1,0 +1,6 @@
+max_rd_len=20000
+[LIB]
+#q=/home/kuleshov/data/SRR172903.fastq
+f=/home/kuleshov/metagenomica/get_10k_reads/reads.formated.fa
+#q=/home/kuleshov/metagenomica/get_10k_reads/reads.formated.qual
+asm_flags=1

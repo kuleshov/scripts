@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+import argparse
+import sys
+import random
+
+from random import randint
+from libkuleshov.fastx import read_fasta
+
+##############################################################################
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--len', type=int)
+parser.add_argument('--cov', type=int)
+parser.add_argument('--even', action='store_true')
+parser.add_argument('--meta')
+parser.add_argument('--ref')
+
+args = parser.parse_args()
+
+##############################################################################
+
+ctg_by_org = dict()
+weight_by_org = dict()
+with open(args.meta) as meta:
+	for line in meta:
+		fields = line.split()
+		ctg = int(fields[0])
+		organism = fields[-1]
+		weight = float(fields[4])
+
+		if organism not in ctg_by_org:
+			ctg_by_org[organism] = [ctg]
+			weight_by_org[organism] = weight
+		else:
+			ctg_by_org[organism].append(ctg)
+
+##############################################################################
+
+def weighted_choice(choices):
+   total = sum(w for c, w in choices)
+   r = random.uniform(0, total)
+   upto = 0
+   for c, w in choices:
+      if upto + w >= r:
+         return c
+      upto += w
+   print choices
+   assert False, "Shouldn't get here"
+
+##############################################################################
+
+parse_fn = lambda x: int(x[1:].strip().split('|')[1])
+ctg_fasta = read_fasta(args.ref, parse=parse_fn)
+
+genome_lengths = [sum([len(ctg_fasta[ctg]) for ctg in org_contigs]) for org_contigs in ctg_by_org.values()]
+organisms = ctg_by_org.keys()
+total_sequence = sum(genome_lengths)
+
+num_reads = total_sequence * args.cov / args.len
+num_organisms = len(ctg_by_org.keys())
+
+for i in xrange(num_reads):
+	if args.even:
+		o = random.choice(organisms)
+	else:
+		o = weighted_choice([(k,v) for k,v in weight_by_org.iteritems()])
+
+	choices = [(ctg_fasta[ctg], len(ctg_fasta[ctg])) for ctg in ctg_by_org[o]]
+	ctg = weighted_choice(choices)
+
+	r = randint(0,len(ctg)-1)
+	read = ctg[r:r+args.len]
+	print '>simulated_read_%d_%d' % (i, len(read))
+	print read
+
+	sys.stderr.write('>simulated_read_%d_%d\n' % (i, len(read)))
+	sys.stderr.write(' '.join(['99'] * len(read)) + '\n')

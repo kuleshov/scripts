@@ -1,0 +1,1 @@
+Generates short reads across many wells using dgsim, and then assembles them using SGA.
