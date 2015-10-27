@@ -1,0 +1,24 @@
+PATHS
+JELLYFISH_PATH= /home/kuleshov/bin/asm/MaSuRCA-2.1.0/bin
+SR_PATH=  /home/kuleshov/bin/asm/MaSuRCA-2.1.0/bin
+CA_PATH=  /home/kuleshov/bin/asm/MaSuRCA-2.1.0/CA/Linux-amd64/bin
+END
+
+DATA
+PE=p1 M S reads1.fastq reads2.fastq
+END
+ 
+PARAMETERS
+GRAPH_KMER_SIZE=auto
+#set this to 1 for Illumina-only assemblies and to 0 if you have 2x or 
+more long (Sanger, 454) reads 
+USE_LINKING_MATES=1
+NUM_THREADS=32
+JF_SIZE=2000000000 
+#these are the additional parameters to Celera Assembler. do not 
+worry about performance, number or processors or batch sizes -- these 
+are computed automatically. for mammals do not set cgwErrorRate above 
+0.15!!! 
+CA_PARAMETERS = ovlMerSize=30 cgwErrorRate=0.25 ovlMemory=4GB 
+END 
+

@@ -61,6 +61,7 @@ reads.pre_simplify: reads-contigs.fa
 	$(ARCH) prune \
 		--in $(CHECKPOINTS)/1.contracted \
 		--out $(CHECKPOINTS)/2.pruned \
+		--dot 2.pruned.dot \
 		> 2.prune.log
 	touch $@
 
@@ -73,7 +74,20 @@ reads.pre_simplify: reads-contigs.fa
 		> 3.resolve.log
 	touch $@
 
+3.bubbles.done: 2.prune.done
+	$(ARCH) pop-bubbles \
+		--in $(CHECKPOINTS)/2.pruned \
+		--out $(CHECKPOINTS)/3.bubbles-popped \
+		--dot 3.bubbles.dot \
+		--stats 3.bubbles.stats \
+		--log 3.bubbles.log
+	touch $@
 
-
-
-
+4.traverse.done: 3.bubbles.done
+	$(ARCH) traverse \
+		--in $(CHECKPOINTS)/3.bubbles-popped \
+		--out $(CHECKPOINTS)/4.traversed \
+		--dot 4.traverse.dot \
+		--stats 4.traverse.stats \
+		--log 4.traverse.log
+	touch $@
