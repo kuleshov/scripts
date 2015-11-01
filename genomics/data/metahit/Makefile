@@ -5,3 +5,8 @@ samples.random.ids: ./MetaHitIDs2EBIacc.txt
 
 dl.done: ./samples.random.ids ./samples.txt
 	bash dl.sh $< ./samples.txt
+	touch $@
+
+count.done: samples.random.ids dl.done
+	bash count.sh $<
+	touch $@
