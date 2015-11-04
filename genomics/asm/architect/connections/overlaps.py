@@ -7,9 +7,11 @@ import pickle
 import pysam
 
 import nwalign as nw
+from Bio.pairwise2 import align
 import networkx as nx
 
 from libkuleshov.stats import n50
+from libkuleshov.dna import reverse_complement
 
 # ----------------------------------------------------------------------------
 
@@ -96,28 +98,43 @@ print n50(component_lengths)
 # ----------------------------------------------------------------------------
 # compute overlaps
 
+def myalign(s1,s2):
+  return align.globalms(s1,s2,2,-1,-2,-0.2,penalize_end_gaps=False)[0]
+
 def ctgs_overlap(ctg1, ctg2):
-  head_seq1 = ctg_seq[ctg1][:55]
-  tail_seq1 = ctg_seq[ctg1][-55:]
-  head_seq2 = ctg_seq[ctg2][:55]
-  tail_seq2 = ctg_seq[ctg2][-55:]
+  head_seq1 = ctg_seq[ctg1][:100]
+  tail_seq1 = ctg_seq[ctg1][-100:]
+  head_seq2 = ctg_seq[ctg2][:100]
+  tail_seq2 = ctg_seq[ctg2][-100:]
 
-  hh_align = nw.global_align(head_seq1, head_seq2)
-  hh_matches = len([x for x,y in zip(*hh_align) if x == y])
-  ht_align = nw.global_align(head_seq1, tail_seq2)
-  ht_matches = len([x for x,y in zip(*ht_align) if x == y])
-  th_align = nw.global_align(tail_seq1, head_seq2)
-  th_matches = len([x for x,y in zip(*th_align) if x == y])
-  tt_align = nw.global_align(tail_seq1, tail_seq2)
-  tt_matches = len([x for x,y in zip(*tt_align) if x == y])
+  hh_align = myalign(head_seq1, reverse_complement(head_seq2))
+  hh_score = hh_align[2]
+  ht_align = myalign(head_seq1, tail_seq2)
+  ht_score = ht_align[2]
+  th_align = myalign(tail_seq1, head_seq2)
+  th_score = th_align[2]
+  tt_align = myalign(tail_seq1, reverse_complement(tail_seq2))
+  tt_score = tt_align[2]
 
-  matches = (hh_matches, ht_matches, th_matches, tt_matches)
+  # hh_align = nw.global_align(head_seq1, reverse_complement(head_seq2))
+  # hh_score = len([x for x,y in zip(*hh_align) if x == y])
+  # ht_align = nw.global_align(head_seq1, tail_seq2)
+  # ht_score = len([x for x,y in zip(*ht_align) if x == y])
+  # th_align = nw.global_align(tail_seq1, head_seq2)
+  # th_score = len([x for x,y in zip(*th_align) if x == y])
+  # tt_align = nw.global_align(tail_seq1, reverse_complement(tail_seq2))
+  # tt_score = len([x for x,y in zip(*tt_align) if x == y])
+
+  scores = (hh_score, ht_score, th_score, tt_score)
   aligns  =  (hh_align, ht_align, th_align, tt_align)
 
-  # for m, a in zip(matches, aligns):
-  #   if m > 70:
-  #    print m, a,
-  if any(m > 50 for m in matches):
+  best_i = max([0,1,2,3],key=lambda x: scores[x])
+  # print best_i
+  # print scores[best_i]
+  # print aligns[best_i][0]
+  # print aligns[best_i][1]
+
+  if any(m > 20 for m in scores):
     return True
     # overlaps.add(frozenset([ctg1,ctg2]))
 
@@ -141,6 +158,11 @@ for i, ovl in enumerate(true_overlaps):
     validated_overlaps.add(ovl)
     continue
   ctg1, ctg2 = list(ovl)
+  if ctg_lengths[ctg1] < 1000 or ctg_lengths[ctg2] < 1000:
+    continue
+  # print
+  # print ctg1, ctg_lengths[ctg1], ctg_ivls[ctg1]
+  # print ctg2, ctg_lengths[ctg2], ctg_ivls[ctg2]
   if ctgs_overlap(ctg1, ctg2):
     validated_overlaps.add(ovl)
 
