@@ -5,7 +5,12 @@ BAM:=../shotgun-to-spades-shotgun/reads.bam
 overlaps:
 	python ./overlaps.py -c $(CTMT) -f $(FASTA)
 
-pe:
+coarse-pe:
+	python ./coarse-pe-connections.py \
+	  -b $(BAM) \
+	  -f $(FASTA)
+
+explore-pe:
 	python ./explore-pe.py \
 	  -b $(BAM) \
 	  -f $(FASTA)

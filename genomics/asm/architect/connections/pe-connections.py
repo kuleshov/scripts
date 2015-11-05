@@ -40,10 +40,11 @@ for i, ref in enumerate(bamfile.references):
       bamfile.fetch(ref, ref_len-350, ref_len)
     )
   else:
-    continue
+    # continue
     reads = bamfile.fetch(ref)
   for read in reads:
     if not read.is_paired: continue
+    if read.mapq < 10: continue
     if read.reference_id != read.next_reference_id:
       name1 = bamfile.getrname(read.reference_id)
       name2 = bamfile.getrname(read.next_reference_id)
@@ -52,8 +53,8 @@ for i, ref in enumerate(bamfile.references):
       start1 = read.reference_start
       start2 = read.next_reference_start
 
-      matches = sum([l for (o,l) in read.cigartuples if o == 0])
-      if matches < 120: continue
+      # matches = sum([l for (o,l) in read.cigartuples if o == 0])
+      # if matches < 20: continue
       tdict = R1 if read.is_read1 else R2
 
       if read.qname not in tdict:
@@ -97,10 +98,10 @@ for read1, links in R1.iteritems():
   for ctg1, conn1, strand1, start1 in links:
     for ctg2, conn2, strand2, start2 in R2[read2]:
       # note: we consider certain types of edges invalid
-      # if (conn1 == conn2 and strand1 != strand2) or \
-      #    (conn1 != conn2 and strand1 == strand2):
-      #   n_strange += 1
-      #   continue
+      if (conn1 == conn2 and strand1 != strand2) or \
+         (conn1 != conn2 and strand1 == strand2):
+        n_strange += 1
+        continue
 
       simple_edge = frozenset([ctg1,ctg2])
       if simple_edge not in simple_edge_counts:
@@ -137,7 +138,7 @@ print 'Read paired that were used: %d' % n_valid
 print 'Connections established: %d' % len(edge_dists)
 
 # this is for validation later on
-pickle.dump(simple_edge_counts, open('edge_counts.pkl', 'wb'))
+pickle.dump(simple_edge_counts, open('pe_accurate_edge_counts.pkl', 'wb'))
 
 # write down the edges:
 with open(args.edges, 'w') as out:

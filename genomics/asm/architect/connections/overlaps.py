@@ -134,7 +134,7 @@ def ctgs_overlap(ctg1, ctg2):
   # print aligns[best_i][0]
   # print aligns[best_i][1]
 
-  if any(m > 20 for m in scores):
+  if scores[best_i] > 100:
     return True
     # overlaps.add(frozenset([ctg1,ctg2]))
 
@@ -158,8 +158,8 @@ for i, ovl in enumerate(true_overlaps):
     validated_overlaps.add(ovl)
     continue
   ctg1, ctg2 = list(ovl)
-  if ctg_lengths[ctg1] < 1000 or ctg_lengths[ctg2] < 1000:
-    continue
+  # if ctg_lengths[ctg1] < 1000 or ctg_lengths[ctg2] < 1000:
+  #   continue
   # print
   # print ctg1, ctg_lengths[ctg1], ctg_ivls[ctg1]
   # print ctg2, ctg_lengths[ctg2], ctg_ivls[ctg2]
