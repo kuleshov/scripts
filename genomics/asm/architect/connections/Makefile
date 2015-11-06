@@ -24,3 +24,9 @@ edges.tsv:
 	  -f $(FASTA) \
 	  -e $@ \
 	  -s 300
+
+besst.edges.tsv:
+	python ./besst2tsv.py \
+	  -s ~/graph.vertices.besst.dump \
+	  -e ~/graph.besst.dump \
+	  -t besst.edges.tsv

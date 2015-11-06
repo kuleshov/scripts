@@ -33,9 +33,9 @@ with open(args.edges) as f:
     c1, c2 = scaff_map[s1], scaff_map[s2]
     conn1, conn2 = conn
     if conn1 == conn2:
-      strand = 'S'
-    else:
       strand = 'R'
+    else:
+      strand = 'S'
     tsv.write('%s\t%s\t%s\t%s\t%s\t%s\t100\n'
         % (c1, c2, conn1, conn2, strand, cnt))
     edge_counts[frozenset([c1,c2])] = int(cnt)
