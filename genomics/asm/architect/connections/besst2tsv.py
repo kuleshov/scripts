@@ -36,7 +36,7 @@ with open(args.edges) as f:
       strand = 'R'
     else:
       strand = 'S'
-    tsv.write('%s\t%s\t%s\t%s\t%s\t%s\t100\n'
+    tsv.write('S\t%s\t%s\t%s\t%s\t%s\t%s\t100\n'
         % (c1, c2, conn1, conn2, strand, cnt))
     edge_counts[frozenset([c1,c2])] = int(cnt)
 
