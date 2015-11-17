@@ -14,7 +14,7 @@ parser.add_argument('-b', '--bam', required=True)
 parser.add_argument('-f', '--fasta', required=True)
 parser.add_argument('-e', '--edges', required=True)
 parser.add_argument('-l', '--rlen', type=int, default=101)
-parser.add_argument('-s', '--insert-size', type=int, default=250)
+parser.add_argument('-s', '--insert-size', type=int, default=200)
 
 args = parser.parse_args()
 
@@ -31,13 +31,15 @@ ctg_lengths = {ctg: length for ctg, length in zip(fasta.references, fasta.length
 R1 = dict()
 R2 = dict()
 n_ref = len(bamfile.references)
+d = args.insert_size / 2
+d_cutoff = 2*d + args.rlen
 for i, ref in enumerate(bamfile.references):
   if i % 1000 == 0: print '%d/%d' % (i, n_ref)
   ref_len = ctg_lengths[ref]
-  if ref_len > 700:
+  if ref_len > d_cutoff:
     reads = itertools.chain(
-      bamfile.fetch(ref, 0,350),
-      bamfile.fetch(ref, ref_len-350, ref_len)
+      bamfile.fetch(ref, 0, d),
+      bamfile.fetch(ref, ref_len-d, ref_len)
     )
   else:
     # continue
@@ -62,25 +64,18 @@ for i, ref in enumerate(bamfile.references):
 
       strand = 'R' if read.is_reverse else 'S'
 
-      if ref_len <= 700:
+      if ref_len <= d_cutoff:
         tdict[read.qname].append((name1, 'H', strand, start1))
         tdict[read.qname].append((name1, 'T', strand, start1))
       else:
-        if start1 < 350:
+        if start1 < d:
           tdict[read.qname].append((name1, 'H', strand, start1))
-        elif start1 >= len1 - 350:
+        elif start1 >= len1 - d:
           tdict[read.qname].append((name1, 'T', strand, start1))
         else:
           continue
           # print start1, len1, len1 - start1
           # exit(1)
-
-      # if read.qname in tdict:
-      #   print read.qname, read.is_read1, read.is_read2, read.mapq
-      #   print tdict[read.qname]
-      #   print (name1, start1, read.cigarstring)
-      #   exit(1)
-      # tdict[read.qname] = (name1, start1, read.cigarstring)
 
 simple_edge_counts = dict()
 edge_dists = dict()
@@ -113,7 +108,7 @@ for read1, links in R1.iteritems():
       # determine distance
       # we may choose keep d > 10 to simplify some downstream analysis
       if conn1 == 'H':
-        o1 = start1
+        o1 = start1 + args.rlen
       elif conn1 == 'T':
         o1 = ctg_lengths[ctg1] - start1
       if conn2 == 'H':
@@ -122,6 +117,8 @@ for read1, links in R1.iteritems():
         o2 = ctg_lengths[ctg2] - start2
       # d = max(10, args.insert_size - o1 - o2)
       d = args.insert_size - o1 - o2
+      if o1 < 25 or o2 < 25: continue
+      if o1 + o2 < args.insert_size + 6*25: continue
 
       link1 = (ctg1, conn1)
       link2 = (ctg2, conn2)

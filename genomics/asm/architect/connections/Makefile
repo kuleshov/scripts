@@ -23,7 +23,8 @@ edges.tsv:
 	  -b $(BAM) \
 	  -f $(FASTA) \
 	  -e $@ \
-	  -s 300
+	  -l 125 \
+	  -s 200
 
 besst.edges.tsv:
 	python ./besst2tsv.py \
