@@ -10,7 +10,7 @@ def complement(char):
 	elif char == 'N':
 		return 'N'
 	else:
-		exit("ERROR: Invalid DNA string")
+          exit("ERROR: Invalid DNA character: '%s'" % char)
 
 def complement_string(string):
 	return ''.join([complement(x) for x in string])
